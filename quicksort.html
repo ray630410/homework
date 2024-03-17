@@ -1,20 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Sort</title>
     <style>
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            max-width: 500px; /* Adjust based on preference */
+            padding: 8px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
         table {
             border-collapse: collapse;
-            border: 1px solid black;
+            width: 100%; /* Make table width responsive */
+            margin-top: 10px;
         }
 
         td {
-            width: 6em;
             border: 1px solid black;
-            padding: 0;
-            margin: 0;
-            vertical-align: top;
+            padding: 5px;
             text-align: center;
+            word-break: break-all; /* Ensure content fits within cells */
+        }
+
+        @media (max-width: 600px) {
+            td {
+                font-size: 12px; /* Smaller font size on small screens */
+                padding: 4px; /* Less padding to fit content */
+            }
         }
     </style>
 </head>
