@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Sort</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            border: 1px solid black;
+        }
+
+        td {
+            width: 6em;
+            border: 1px solid black;
+            padding: 0;
+            margin: 0;
+            vertical-align: top;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    Numbers: <input type="text" id="str" size="200" value="2,8,7,1,3,5,6,4">
+    <button onclick="quickSortInit()">Quick Sort</button><br>
+    <input type="checkbox" id="trace" checked> <label for="trace">Trace</label>
+    <div id="output"></div>
+
+    <script>
+	    var tableHTML = "";
+        function drawTable(A, p, i, j, x = -1, y = -1) 
+		{
+            tableHTML += "<table>";
+            tableHTML += "<tr>";
+            A.forEach((a, idx) => {
+                let color = "black";
+                if (x === idx + p || y === idx + p) color = "blue";
+                else if (i >= idx + p) color = "orange";
+                else if (j > idx + p) color = "green";
+                tableHTML += `<td><font color=${color}>${a}</font></td>`;
+            });
+            tableHTML += "</tr><tr>";
+            A.forEach((a, idx) => {
+                tableHTML += `<td>${i === idx + p ? "i" : ""}${j === idx + p ? "j" : ""}</td>`;
+            });
+            tableHTML += "</tr></table><br>";
+        }
+		function drawTable2(A, p, q) 
+		{
+            tableHTML += "<table>";
+            tableHTML += "<tr>";
+            A.forEach((a, idx) => {
+                let color = "black";
+                if (q === idx + p) color = "red";
+                tableHTML += `<td><font color=${color}>${a}</font></td>`;
+            });
+            tableHTML += "</tr></table><br>";
+        }
+        function partition(A, p, r) 
+		{
+            let x = A[r];
+            let i = p - 1;
+			let j = 0;
+            for (j = p; j < r; j++)
+			{
+                drawTable(A.slice(p, r + 1), p, i, j);
+                if (A[j] <= x) 
+				{
+                    i++;
+                    [A[j], A[i]] = [A[i], A[j]];
+                    drawTable(A.slice(p, r + 1), p, i, j, i, j);
+                }
+            }
+            [A[i + 1], A[r]] = [A[r], A[i + 1]];
+            drawTable(A.slice(p, r + 1), p, i, j, i + 1, r);
+            return i + 1;
+        }
+
+        function quicksort(A, p, r) 
+		{
+            if (p < r) 
+			{
+                let q = partition(A, p, r);
+				drawTable2(A.slice(p, r + 1), p, q);
+				tableHTML += "<table><tr><td>";
+                quicksort(A, p, q - 1);
+				tableHTML += "</td><td>";
+                quicksort(A, q + 1, r);
+				tableHTML += "</td></tr></table>";
+            }
+			else
+				tableHTML += "Do Nothing";
+        }
+
+        function quickSortInit() 
+		{
+			var trace = document.getElementById('trace').checked;
+			var output = document.getElementById('output');
+            let A = document.getElementById('str').value.split(',').map(Number);
+            tableHTML = "<table><tr><td>";
+            quicksort(A, 0, A.length - 1, 1);
+			tableHTML += "</td></tr></table>";
+			if(!trace)
+				tableHTML = "";
+			output.innerHTML  = tableHTML;
+            output.innerHTML += "-----------------------Answer---------------<br>";
+            output.innerHTML += A.join(",") + "<br>";
+        }
+    </script>
+</body>
+</html>
