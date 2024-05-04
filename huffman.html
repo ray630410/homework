@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huffman Encoding Example</title>
+    <style>
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 8px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%; /* Make table width responsive */
+            margin-top: 10px;
+        }
+
+        td {
+            border: 1px solid black;
+            padding: 5px;
+			vertical-align: top;
+            text-align: center;
+            word-break: break-all; /* Ensure content fits within cells */
+        }
+
+        @media (max-width: 600px) {
+            td {
+                font-size: 12px; /* Smaller font size on small screens */
+                padding: 4px; /* Less padding to fit content */
+            }
+        }
+    </style>
+</head>
+<body>
+<h2>Huffman Encoder</h2>
+<textarea cols=40 rows=20 id="inputText" placeholder=""></textarea>
+<button onclick="performHuffmanEncoding()">Encode</button>
+<button onclick="showTree()">Show Tree</button>
+<button onclick="showCodes()">Show Codes</button>
+<button onclick="performHuffmanDecoding()">Decode</button>
+<textarea cols=40 rows=20 id="outputText" placeholder=""></textarea>
+<div id="result"></div>
+
+<script>
+class Node {
+    constructor(character, frequency) {
+        this.character = character;
+        this.frequency = frequency;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+function buildTree(frequencies) {
+    const nodes = frequencies.map(freq => new Node(freq[0], freq[1]));
+    while (nodes.length > 1) {
+        nodes.sort((a, b) => a.frequency - b.frequency);
+        let left = nodes.shift();
+        let right = nodes.shift();
+        let merge = new Node(null, left.frequency + right.frequency);
+        merge.left = left;
+        merge.right = right;
+        nodes.push(merge);
+    }
+    return nodes[0];
+}
+
+function generateCodes(node, prefix, codes) {
+    if (node.character) {
+        codes[node.character] = prefix;
+    } else {
+        generateCodes(node.left, prefix + '0', codes);
+        generateCodes(node.right, prefix + '1', codes);
+    }
+}
+
+function traverseTree(node) {
+    if (node.character) {
+        result = "["+node.character+"]("+globalCodes[node.character]+")"+"("+node.frequency+")";
+    } else {
+		result = "<table border=1><tr><td colspan=2>("+node.frequency+")</td></tr><tr>";
+        result += "<td>"+traverseTree(node.left)+"</td>";
+        result += "<td>"+traverseTree(node.right)+"</td>";
+		result += "</tr></table>";
+    }
+	return result;
+}
+
+let globalTree = null;
+let globalCodes = {};
+let globalFrequency = {};
+
+function huffmanEncode(data) {
+    //let frequencies = {};
+    for (let char of data) {
+        if (!globalFrequency[char]) {
+            globalFrequency[char] = 0;
+        }
+        globalFrequency[char]++;
+    }
+
+    let freqList = Object.entries(globalFrequency);
+    globalTree = buildTree(freqList);
+    generateCodes(globalTree, '', globalCodes);
+
+    let encoded = '';
+    for (let char of data) {
+        encoded += globalCodes[char];
+    }
+    return encoded;
+}
+
+function performHuffmanEncoding() {
+	globalTree = null;
+	globalCodes = {};
+	globalFrequency = {};
+	
+    const inputText = document.getElementById('inputText').value;
+    const encodedData = huffmanEncode(inputText);
+    document.getElementById('outputText').value = encodedData;
+	
+	let fix = 1;
+	while(Math.pow(2, fix) < Object.keys(globalCodes).length)
+		fix++;
+	let result = "Characters using in Input:" + Object.keys(globalCodes).length;
+	result += "<br>Fix Length Encoding Bits:" + fix;
+	result += "<br>Orignal Input Length:" + inputText.lengt
+	result += "<br>Orignal Input Length:" + inputText.length;
+	result += "<br>Fix Length Encoding Length:" + (inputText.length * fix);
+	result += "<br>Huffman Encoding Length:" + encodedData.length;
+	result += "<br>Compress Rate:" + ((encodedData.length*100) / (inputText.length * fix))+"%";
+	document.getElementById('result').innerHTML = result;
+}
+
+function performHuffmanDecoding() {
+	let encodedText = document.getElementById('outputText').value;
+    let reverseCodes = Object.fromEntries(Object.entries(globalCodes).map(([char, code]) => [code, char]));
+    let decodedText = '';
+    let currentCode = '';
+    for (let bit of encodedText) {
+        currentCode += bit;
+        if (reverseCodes[currentCode]) {
+            decodedText += reverseCodes[currentCode];
+            currentCode = '';
+        }
+    }
+    document.getElementById('inputText').value = decodedText;
+}
+
+function showTree() {
+    document.getElementById('result').innerHTML = "Tree: <br><table border=1><tr><td>" + traverseTree(globalTree) + "</td></tr><table>";
+}
+
+function showCodes() {
+    let codesText = 'Codes:<br>' + Object.entries(globalCodes).map(entry => `[${entry[0]}]: ${entry[1]} (${globalFrequency[entry[0]]})`).join('<br>');
+    document.getElementById('result').innerHTML = codesText;
+}
+</script>
+</body>
+</html>
