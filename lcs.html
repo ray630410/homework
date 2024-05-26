@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Common Subsequence</title>
+	<style>
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 8px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%; /* Make table width responsive */
+            margin-top: 10px;
+        }
+
+        td {
+            border: 1px solid black;
+            padding: 5px;
+			vertical-align: top;
+            text-align: center;
+            word-break: break-all; /* Ensure content fits within cells */
+        }
+
+        @media (max-width: 600px) {
+            td {
+                font-size: 12px; /* Smaller font size on small screens */
+                padding: 4px; /* Less padding to fit content */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Longest Common Subsequence</h1>
+    <label for="str1">String 1:</label>
+    <input type="text" id="str1" />
+    <br />
+    <label for="str2">String 2:</label>
+    <input type="text" id="str2" />
+    <br />
+    <button onclick="calculateLCS()">Calculate LCS</button>
+    <h2>Result: <div id="result"></span></h2>
+
+<script>
+function longestCommonSubsequence(str1, str2) {
+    const m = str1.length;
+    const n = str2.length;
+
+    // Create a 2D array to store the length of LCS
+    const dp = Array.from(Array(m + 1), () => Array(n + 1).fill(0));
+
+    // Build the dp array from bottom up
+    let tableHTML = "<table border='1'>";
+    tableHTML += "<tr><td></td><td></td>";
+    for (let j = 0; j < n; j++) {
+        tableHTML += "<td id='char2-" + j + "'>" + str2[j] + "</td>";
+    }
+    tableHTML += "</tr>";
+    tableHTML += "<tr><td></td>";
+    for (let j = 0; j <= n; j++) {
+        tableHTML += "<td id='cell0-" + j + "'>0</td>";
+    }
+    tableHTML += "</tr>";
+    for (let i = 1; i <= m; i++) {
+        tableHTML += "<tr><td id='char1-" + (i - 1) + "'>" + str1[i - 1] + "</td><td id='cell" + i + "-0'>0</td>";
+        for (let j = 1; j <= n; j++) {
+            tableHTML += "<td id='cell" + i + "-" + j + "'>";
+            if (str1[i - 1] === str2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+            } else {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+            tableHTML += dp[i][j] + "</td>";
+        }
+        tableHTML += "</tr>";
+    }
+    tableHTML += "</table>";
+
+    document.getElementById('result').innerHTML = tableHTML;
+
+    // Reconstruct the LCS from the dp array and highlight the path
+    let lcs = '';
+    let i = m, j = n;
+    while (i > 0 && j > 0) {
+        document.getElementById('cell' + i + '-' + j).style.color = 'red';
+        if (str1[i - 1] === str2[j - 1]) {
+            lcs = str1[i - 1] + lcs;
+            document.getElementById('char1-' + (i - 1)).style.color = 'blue';
+            document.getElementById('char2-' + (j - 1)).style.color = 'blue';
+            i--;
+            j--;
+        } else if (dp[i - 1][j] >= dp[i][j - 1]) {
+            i--;
+        } else {
+            j--;
+        }
+    }
+
+    document.getElementById('result').innerHTML += "<br>LCS: " + lcs;
+    return lcs;
+}
+
+function calculateLCS() {
+    const str1 = document.getElementById('str1').value;
+    const str2 = document.getElementById('str2').value;
+    longestCommonSubsequence(str1, str2);
+}
+
+</script>
+</body>
+</html>
