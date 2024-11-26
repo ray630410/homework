@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>JSONP示範</title>
+</head>
+<body>
+    <h1>即時資料展示</h1>
+    <div id="userInfo"></div>
+    <button onclick="fetchRandomUser()">獲取隨機用戶</button>
+
+    <script>
+        function handleUser(data) {
+            const user = data.results[0];
+            document.getElementById('userInfo').innerHTML = `
+                <img src="${user.picture.large}" width="100">
+                <p>姓名: ${user.name.first} ${user.name.last}</p>
+                <p>郵箱: ${user.email}</p>
+                <p>國家: ${user.location.country}</p>
+            `;
+        }
+
+        function fetchRandomUser() {
+            const script = document.createElement('script');
+            script.src = 'https://randomuser.me/api/?callback=handleUser';
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>
