@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JavaScript OCR Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    video, canvas {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      max-width: 100%;
+      height: auto;
+    }
+    #output {
+      white-space: pre-wrap;
+      text-align: left;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: #f9f9f9;
+    }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #capture-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>JavaScript OCR with Tesseract.js</h1>
+
+  <!-- Video Stream -->
+  <video id="video" width="640" height="480" autoplay></video>
+  <br>
+
+  <!-- Capture Button -->
+  <button id="capture-button">Take Picture</button>
+
+  <!-- Canvas to Display Captured Image -->
+  <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+
+  <!-- Status Indicator -->
+  <p id="status">Status: Idle</p>
+
+  <!-- OCR Output -->
+  <div id="output"></div>
+
+  <!-- Tesseract.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // Selecting DOM elements
+    const video = document.getElementById('video');
+    const captureButton = document.getElementById('capture-button');
+    const canvas = document.getElementById('canvas');
+    const status = document.getElementById('status');
+    const output = document.getElementById('output');
+
+    // Access the device camera and stream to video element
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (err) {
+        console.error('Error accessing the camera:', err);
+        status.textContent = 'Status: Camera access denied or not available.';
+      }
+    }
+
+    // Capture the current frame from the video stream
+    function capturePhoto() {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.style.display = 'block'; // Show the canvas
+    }
+
+    // Perform OCR on the captured image
+    async function performOCR() {
+      status.textContent = 'Status: Performing OCR...';
+      output.textContent = '';
+
+      try {
+        // Get image data from the canvas
+        const image = canvas.toDataURL('image/png');
+
+        // Initialize Tesseract.js
+        const worker = Tesseract.createWorker({
+          logger: m => {
+            console.log(m);
+            if (m.status) {
+              status.textContent = `Status: ${m.status} (${Math.round(m.progress * 100)}%)`;
+            }
+          }
+        });
+
+        await worker.load();
+        await worker.loadLanguage('chi_sim+eng'); // Load Simplified Chinese and English
+        await worker.initialize('chi_sim+eng');
+        // Optional: You can specify other options here
+
+        // Recognize text from image
+        const { data: { text } } = await worker.recognize(image);
+
+        // Display the OCR result
+        output.textContent = text;
+        status.textContent = 'Status: OCR Completed';
+
+        // Terminate the worker to free up resources
+        await worker.terminate();
+      } catch (error) {
+        console.error('Error during OCR:', error);
+        status.textContent = 'Status: OCR Error';
+      }
+    }
+
+    // Event listener for the capture button
+    captureButton.addEventListener('click', () => {
+      capturePhoto();
+      performOCR();
+    });
+
+    // Initialize the camera on page load
+    window.addEventListener('DOMContentLoaded', initCamera);
+  </script>
+
+</body>
+</html>
