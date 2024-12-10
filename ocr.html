@@ -25,6 +25,7 @@
       margin-left: auto;
       margin-right: auto;
       background-color: #f9f9f9;
+      overflow-wrap: break-word;
     }
     #status {
       margin-top: 10px;
@@ -58,8 +59,8 @@
   <!-- OCR Output -->
   <div id="output"></div>
 
-  <!-- Tesseract.js Library (All-in-One Build) -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.all.min.js"></script>
+  <!-- Tesseract.js Library (Standard Build) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
   <!-- JavaScript Logic -->
   <script>
@@ -90,7 +91,7 @@
       canvas.style.display = 'block'; // Show the canvas
     }
 
-    // Perform OCR on the captured image
+    // Perform OCR on the captured image using Tesseract.recognize
     async function performOCR() {
       status.textContent = 'Status: Performing OCR...';
       output.textContent = '';
@@ -99,30 +100,23 @@
         // Get image data from the canvas
         const image = canvas.toDataURL('image/png');
 
-        // Initialize Tesseract.js Worker
-        const worker = Tesseract.createWorker({
-          logger: m => {
-            console.log(m);
-            if (m.status) {
-              status.textContent = `Status: ${m.status} (${Math.round(m.progress * 100)}%)`;
+        // Recognize text directly using Tesseract.recognize
+        const { data: { text } } = await Tesseract.recognize(
+          image,
+          'chi_sim+eng', // Specify languages: Simplified Chinese and English
+          {
+            logger: m => {
+              console.log(m);
+              if (m.status) {
+                status.textContent = `Status: ${m.status} (${Math.round(m.progress * 100)}%)`;
+              }
             }
           }
-        });
-
-        await worker.load();
-        await worker.loadLanguage('chi_sim+eng'); // Load Simplified Chinese and English
-        await worker.initialize('chi_sim+eng');
-        // Optional: You can specify other options here
-
-        // Recognize text from image
-        const { data: { text } } = await worker.recognize(image);
+        );
 
         // Display the OCR result
         output.textContent = text;
         status.textContent = 'Status: OCR Completed';
-
-        // Terminate the worker to free up resources
-        await worker.terminate();
       } catch (error) {
         console.error('Error during OCR:', error);
         status.textContent = 'Status: OCR Error';
