@@ -58,8 +58,8 @@
   <!-- OCR Output -->
   <div id="output"></div>
 
-  <!-- Tesseract.js Library -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <!-- Tesseract.js Library (All-in-One Build) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.all.min.js"></script>
 
   <!-- JavaScript Logic -->
   <script>
@@ -99,7 +99,7 @@
         // Get image data from the canvas
         const image = canvas.toDataURL('image/png');
 
-        // Initialize Tesseract.js
+        // Initialize Tesseract.js Worker
         const worker = Tesseract.createWorker({
           logger: m => {
             console.log(m);
